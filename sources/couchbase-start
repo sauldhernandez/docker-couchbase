@@ -25,8 +25,11 @@ PID=$!
 # Init Couchbase
 untilsuccessful couchbase-cli node-init -c $IP \
         --node-init-data-path=/data \
-        --node-init-index-path=/index \
-        --node-init-hostname=${PUBLIC_NAME:-$IP}
+        --node-init-index-path=/index
+
+untilsuccessful curl -v -X POST -u $CB_USERNAME:$CB_PASSWORD \
+        http://127.0.0.1:8091/node/controller/rename -d hostname=${PUBLIC_NAME:-$IP}
+
 
 if [ -n "$SEED" ]; then
         echo "Make Couchbase ($IP) join the cluster via $SEED"
