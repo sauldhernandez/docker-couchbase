@@ -9,6 +9,8 @@ function untilsuccessful() {
         done
 }
 
+echo "127.0.0.1 ${PUBLIC_NAME}" >> /etc/hosts
+
 LOCAL_IP=`hostname --ip-address`
 IP=${IP:-$LOCAL_IP}
 SEED=$1
