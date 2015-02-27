@@ -37,7 +37,7 @@ if [ -n "$SEED" ]; then
         echo "Make Couchbase ($IP) join the cluster via $SEED"
         untilsuccessful couchbase-cli server-add -c $SEED \
                 --user=$CB_USERNAME --password=$CB_PASSWORD \
-                --server-add=$IP
+                --server-add=${PUBLIC_NAME}
         untilsuccessful couchbase-cli rebalance -c $SEED \
                 --user=$CB_USERNAME --password=$CB_PASSWORD
 else
