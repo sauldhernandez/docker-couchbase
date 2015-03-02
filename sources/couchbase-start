@@ -21,6 +21,7 @@ CB_DEFAULT_BUCKET_RAMSIZE=${CB_DEFAULT_BUCKET_RAMSIZE:-128}
 # Start Couchbase in background
 su - couchbase -c "/opt/couchbase/bin/couchbase-server -- -noinput" &
 PID=$!
+FILE=/opt/couchbase/var/lib/couchbase/config/check
 
 # Init Couchbase
 untilsuccessful couchbase-cli node-init -c $IP \
@@ -32,24 +33,28 @@ if [ "$IP" = "$LOCAL_IP" ]; then
                 http://127.0.0.1:8091/node/controller/rename -d hostname=${HOSTNAME:$IP}
 fi
 
-
-if [ -n "$SEED" ]; then
-        echo "Make Couchbase ($IP) join the cluster via $SEED"
-        untilsuccessful couchbase-cli server-add -c $SEED \
-                --user=$CB_USERNAME --password=$CB_PASSWORD \
-                --server-add=$IP
-        untilsuccessful couchbase-cli rebalance -c $SEED \
-                --user=$CB_USERNAME --password=$CB_PASSWORD
-else
-        echo "Make Couchbase ($IP) the first cluster node"
-        untilsuccessful couchbase-cli cluster-init -c $IP \
-                --cluster-init-username=$CB_USERNAME \
-                --cluster-init-password=$CB_PASSWORD \
-                --cluster-init-ramsize=$CB_RAMSIZE
-        untilsuccessful couchbase-cli bucket-create -c $IP \
-                -u $CB_USERNAME -p $CB_PASSWORD \
-                --bucket=$CB_DEFAULT_BUCKET_NAME --bucket-ramsize=$CB_DEFAULT_BUCKET_RAMSIZE
+if [ -f "$FILE" ]; then
+        if [ -n "$SEED" ]; then
+                echo "Make Couchbase ($IP) join the cluster via $SEED"
+                touch /opt/couchbase/var/lib/couchbase/config/check
+                untilsuccessful couchbase-cli server-add -c $SEED \
+                        --user=$CB_USERNAME --password=$CB_PASSWORD \
+                        --server-add=$IP
+                untilsuccessful couchbase-cli rebalance -c $SEED \
+                        --user=$CB_USERNAME --password=$CB_PASSWORD
+        else
+                echo "Make Couchbase ($IP) the first cluster node"
+                touch /opt/couchbase/var/lib/couchbase/config/check
+                untilsuccessful couchbase-cli cluster-init -c $IP \
+                        --cluster-init-username=$CB_USERNAME \
+                        --cluster-init-password=$CB_PASSWORD \
+                        --cluster-init-ramsize=$CB_RAMSIZE
+                untilsuccessful couchbase-cli bucket-create -c $IP \
+                        -u $CB_USERNAME -p $CB_PASSWORD \
+                        --bucket=$CB_DEFAULT_BUCKET_NAME --bucket-ramsize=$CB_DEFAULT_BUCKET_RAMSIZE
+        fi
 fi
+
 
 # Wait indefinitely on Couchbase process
 wait $PID
