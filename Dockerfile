@@ -26,10 +26,11 @@ RUN ln -s /opt/couchbase/bin/couchbase-cli /usr/local/bin/
 # Put start script
 ADD sources/couchbase-start /usr/local/bin/
 
-RUN mkdir -p /data/ /index
-RUN chown couchbase:couchbase /data /index
+RUN mkdir -p /data/ /index/ /config
+RUN chown couchbase:couchbase /data /index /config
 VOLUME /data
 VOLUME /index
+VOLUME /config
 
 # See http://docs.couchbase.com/couchbase-manual-2.5/cb-install/#xdcr
 EXPOSE 4369 8091 8092 11210 11211
