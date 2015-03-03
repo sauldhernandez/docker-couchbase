@@ -34,7 +34,7 @@ untilsuccessful couchbase-cli node-init -c $IP \
 untilsuccessful curl -v -X POST -u $CB_USERNAME:$CB_PASSWORD \
         http://127.0.0.1:8091/node/controller/rename -d hostname=${PUBLIC_NAME:-$IP}
 
-if [ -f $FILE ]; then
+if [ ! -f $FILE ]; then
         if [ -n "$SEED" ]; then
                 echo "Make Couchbase ($IP) join the cluster via $SEED"
                 touch /opt/couchbase/var/lib/couchbase/config/check
