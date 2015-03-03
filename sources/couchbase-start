@@ -26,15 +26,16 @@ PID=$!
 
 FILE=/opt/couchbase/var/lib/couchbase/config/check
 
-# Init Couchbase
-untilsuccessful couchbase-cli node-init -c $IP \
-        --node-init-data-path=/data \
-        --node-init-index-path=/index
-
-untilsuccessful curl -v -X POST -u $CB_USERNAME:$CB_PASSWORD \
-        http://127.0.0.1:8091/node/controller/rename -d hostname=${PUBLIC_NAME:-$IP}
-
 if [ ! -f $FILE ]; then
+
+        # Init Couchbase
+        untilsuccessful couchbase-cli node-init -c $IP \
+                --node-init-data-path=/data \
+                --node-init-index-path=/index
+
+        untilsuccessful curl -v -X POST -u $CB_USERNAME:$CB_PASSWORD \
+                http://127.0.0.1:8091/node/controller/rename -d hostname=${PUBLIC_NAME:-$IP}
+
         if [ -n "$SEED" ]; then
                 echo "Make Couchbase ($IP) join the cluster via $SEED"
                 touch /opt/couchbase/var/lib/couchbase/config/check
@@ -54,14 +55,7 @@ if [ ! -f $FILE ]; then
                         -u $CB_USERNAME -p $CB_PASSWORD \
                         --bucket=$CB_DEFAULT_BUCKET_NAME --bucket-ramsize=$CB_DEFAULT_BUCKET_RAMSIZE
         fi
-else
-        SEED=`/usr/bin/etcdctl get /couchbase/seed`
-        echo "Make Couchbase ($IP) join the cluster via $SEED"
-        untilsuccessful couchbase-cli server-add -c $SEED \
-                --user=$CB_USERNAME --password=$CB_PASSWORD \
-                --server-add=${PUBLIC_NAME}
-        untilsuccessful couchbase-cli rebalance -c $SEED \
-                --user=$CB_USERNAME --password=$CB_PASSWORD
+
 fi
 
 
