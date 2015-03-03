@@ -55,6 +55,7 @@ if [ ! -f $FILE ]; then
                         --bucket=$CB_DEFAULT_BUCKET_NAME --bucket-ramsize=$CB_DEFAULT_BUCKET_RAMSIZE
         fi
 else
+        SEED=/usr/bin/etcdctl get /couchbase/seed
         echo "Make Couchbase ($IP) join the cluster via $SEED"
         untilsuccessful couchbase-cli server-add -c $SEED \
                 --user=$CB_USERNAME --password=$CB_PASSWORD \
