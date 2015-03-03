@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 function untilsuccessful() {
         "$@"
@@ -8,6 +8,8 @@ function untilsuccessful() {
                 "$@"
         done
 }
+
+echo "127.0.0.1 ${PUBLIC_NAME}" >> /etc/hosts
 
 LOCAL_IP=`hostname --ip-address`
 IP=${IP:-$LOCAL_IP}
@@ -19,9 +21,9 @@ CB_DEFAULT_BUCKET_NAME=${CB_DEFAULT_BUCKET_NAME:-default}
 CB_DEFAULT_BUCKET_RAMSIZE=${CB_DEFAULT_BUCKET_RAMSIZE:-128}
 
 # Start Couchbase in background
-
 su - couchbase -c "/opt/couchbase/bin/couchbase-server -- -noinput" &
 PID=$!
+
 FILE=/opt/couchbase/var/lib/couchbase/config/check
 
 # Init Couchbase
@@ -29,18 +31,16 @@ untilsuccessful couchbase-cli node-init -c $IP \
         --node-init-data-path=/data \
         --node-init-index-path=/index
 
-if [ "$IP" = "$LOCAL_IP" ]; then
-        untilsuccessful curl -v -X POST -u $CB_USERNAME:$CB_PASSWORD \
-                http://127.0.0.1:8091/node/controller/rename -d hostname=${HOSTNAME:$IP}
-fi
+untilsuccessful curl -v -X POST -u $CB_USERNAME:$CB_PASSWORD \
+        http://127.0.0.1:8091/node/controller/rename -d hostname=${PUBLIC_NAME:-$IP}
 
-if [ -n "$FILE" ]; then
+if [ -f $FILE ]; then
         if [ -n "$SEED" ]; then
                 echo "Make Couchbase ($IP) join the cluster via $SEED"
                 touch /opt/couchbase/var/lib/couchbase/config/check
                 untilsuccessful couchbase-cli server-add -c $SEED \
                         --user=$CB_USERNAME --password=$CB_PASSWORD \
-                        --server-add=$IP
+                        --server-add=${PUBLIC_NAME}
                 untilsuccessful couchbase-cli rebalance -c $SEED \
                         --user=$CB_USERNAME --password=$CB_PASSWORD
         else

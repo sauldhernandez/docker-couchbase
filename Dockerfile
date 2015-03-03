@@ -10,6 +10,7 @@ ENV CB_RELEASE_URL http://packages.couchbase.com/releases
 ENV CB_PACKAGE couchbase-server-community_${CB_VERSION}_x86_64.deb
 ENV CB_USERNAME Administrator
 ENV CB_PASSWORD couchbase
+ENV CB_DEFAULT_BUCKET_NAME socialplus
 
 # Install couchbase
 ENV DEBIAN_FRONTEND noninteractive
