@@ -54,7 +54,7 @@ if [ ! -f $FILE ]; then
                 untilsuccessful couchbase-cli bucket-create -c $IP \
                         -u $CB_USERNAME -p $CB_PASSWORD \
                         --bucket=$CB_DEFAULT_BUCKET_NAME \
-                        --bucket-replica=0\
+                        --bucket-replica=0 \
                         --bucket-ramsize=$CB_DEFAULT_BUCKET_RAMSIZE
         fi
 
